@@ -38,6 +38,7 @@ end
 class BackupChecker
     def initialize
         @@logfile = '/var/log/rsnapshot.log'
+        @@gzlogfile = '/var/log/rsnapshot.log.1.gz'
         @file = File.new(@@logfile, 'r')
         @date = Time.yesterday.strftime("%d/%b/%Y") # Format 01/Jan/2011
         @backups = 0 # N. of backups found
@@ -46,8 +47,15 @@ class BackupChecker
     # Extract the interesting lines from log
     def extract_lines
         reg = Regexp.new('^\[' + @date + ':\d\d:\d\d:\d\d\].*\n', Regexp::MULTILINE)
+        if File.exists?(@@gzlogfile)
+            require 'zlib'
+            gzfile = open(@@gzlogfile)
+            @gz = Zlib::GzipReader.new(gzfile)
+            @gz.read.match(reg).to_s.split("\n")
+        end
         @file.read.match(reg).to_s.split("\n")
     end
+
     
     # The real work
     def parse_lines(lines)
