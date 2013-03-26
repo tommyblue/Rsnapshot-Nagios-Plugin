@@ -46,14 +46,13 @@ class BackupChecker
     
     # Extract the interesting lines from log
     def extract_lines
+        reg = Regexp.new('^\[' + @date + ':\d\d:\d\d:\d\d\].*\n', Regexp::MULTILINE)
         if File.exists?(@@gzlogfile)
             require 'zlib'
             gzfile = open(@@gzlogfile)
             @gz = Zlib::GzipReader.new(gzfile)
             @gz.read.match(reg).to_s.split("\n")
         end
-
-        reg = Regexp.new('^\[' + @date + ':\d\d:\d\d:\d\d\].*\n', Regexp::MULTILINE)
         @file.read.match(reg).to_s.split("\n")
     end
 
